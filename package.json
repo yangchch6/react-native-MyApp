@@ -9,6 +9,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@remobile/react-native-toast": "^1.0.7",
     "react": "16.0.0-alpha.6",
     "react-native": "0.44.2",
     "react-navigation": "^1.5.11"

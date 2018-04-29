@@ -6,6 +6,7 @@
  */
 import React, {Component} from 'react';
 import Global from '../utils/Global';
+import TitleBar from '../components/TitleBar';
 
 import {
 	Dimensions,
@@ -36,9 +37,10 @@ export default class ContactsScreen extends Component {
   render() {
     return(
     	<View style={styles.container}>
-	        <View style={styles.content}>
-	          <Text style={{fontSize: 16, color: '#000000'}}>通讯录列表</Text>
-	        </View>
+        <TitleBar nav={this.props.navigation}/>
+        <View style={styles.content}>
+          <Text style={{fontSize: 16, color: '#000000'}}>通讯录列表</Text>
+        </View>
 	    </View>
     );
   }

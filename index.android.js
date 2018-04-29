@@ -10,6 +10,9 @@ import {StackNavigator,TabNavigator } from 'react-navigation';
 import ContactsScreen from './src/screens/ContactsScreen';
 import MeScreen from './src/screens/MeScreen';
 import Global from './src/utils/Global';
+import TitleBar from './src/components/TitleBar';
+
+import ConversationUtil from './src/utils/ConversationUtil';
 
 import {
   AppRegistry,
@@ -17,7 +20,8 @@ import {
   Text,
   View,
   Image,
-  Dimensions
+  Dimensions,
+  StatusBar
 } from 'react-native';
 
 const {width} = Dimensions.get('window');
@@ -37,11 +41,102 @@ export default class HomeScreen extends Component {
     },
   };
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      checkedUpgrade: true, // 标记是否检查了更新，这里置为true则不会检查更新，设置为false则每次启动时检查更新，该功能默认不开启
+      recentConversation: []
+    };
+    // this.registerHXListener();
+  }
+
+  loadConversations(username) {
+    ConversationUtil.getConversations(username, (result) => {
+      let count = result.length;
+      if (count == 0) {
+        // 没有会话，创建两个会话
+        this.generateAutoConversation('tulingrobot');
+        return;
+      }
+      let index = 0;
+      for (let i = 0; i < count; i++) {
+        let conversation = result[i];
+        let chatWithUsername = conversation.conversationId.replace(username, '');
+        UserInfoUtil.getUserInfo(chatWithUsername, (userInfo) => {
+          index++;
+          if (userInfo != null) {
+            conversation['avatar'] = userInfo.avatar;
+            conversation['nick'] = userInfo.nick;
+          }
+          if (index == count) {
+            this.setState({recentConversation: result});
+            ConversationUtil.showConversations();
+          }
+        });
+      }
+    });
+  }
+
+  // 生成自动回复的对话
+  generateAutoConversation(chatUsername) {
+    let id = WebIM.conn.getUniqueId();           // 生成本地消息id
+    let msg = new WebIM.message('txt', id);      // 创建文本消息
+    let message = '你好，我是RNWeChat作者，欢迎使用RNWeChat，有任何问题都可以与我交流！';
+    if (chatUsername == 'tulingrobot') {
+      message = '我是图灵机器人，开心或者不开心，都可以找我聊天~';
+    }
+    msg.set({
+      msg: message,                  // 消息内容
+      to: this.state.username,        // 接收消息对象（用户id）
+      roomType: false,
+      success: function (id, serverMsgId) {
+      },
+      fail: function (e) {
+      }
+    });
+    msg.body.chatType = 'singleChat';
+    ConversationUtil.addMessage({
+      'conversationId': ConversationUtil.generateConversationId(chatUsername, this.state.username),
+      'id': id,
+      'from': chatUsername,
+      'to': this.state.username,
+      'time': TimeUtil.currentTime(),
+      'data': message,
+      'msgType': 'txt'
+    }, ()=>{
+      if (chatUsername == 'tulingrobot' && this.state.username != 'yubo666') {
+        this.generateAutoConversation('yubo666');
+      } else {
+        this.loadConversations(this.state.username);
+      }
+    });
+  }
+  
   render() {
     return (
       <View style={styles.container}>
+        <StatusBar
+          backgroundColor='#393A3E'
+          barStyle="light-content"
+        />
+        <TitleBar nav={this.props.navigation}/>
+        <View style={styles.divider}></View>
         <View style={styles.content}>
-          <Text style={{fontSize: 16, color: '#000000'}}>聊天界面</Text>
+          {
+            this.state.recentConversation.length == 0 ? (
+              <Text style={styles.emptyHintText}>暂无会话消息</Text>
+            ) : (
+              <FlatList
+                data={this.state.recentConversation}
+                renderItem={this.renderItem}
+                keyExtractor={this._keyExtractor}
+              />
+            )
+          }
+        </View>
+        <View style={styles.divider}></View>
+        <View style={{backgroundColor: 'transparent', position: 'absolute', left: 0, top: 0, width: width}}>
+          <UpgradeDialog ref="upgradeDialog" content={this.state.upgradeContent}/>
         </View>
       </View>
     );
