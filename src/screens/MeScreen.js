@@ -20,7 +20,6 @@ import {
   Image,
   ScrollView,
   TouchableHighlight,
-  Alert,
 } from 'react-native';
 
 const {width} = Dimensions.get('window');
@@ -147,8 +146,7 @@ export default class MeScreen extends Component {
         <ScrollView style={styles.content}>
           <View style={{width: width, height: 20}}/>
           <TouchableHighlight underlayColor={Global.touchableHighlightColor} onPress={() => {
-            // this.turnOnPage('PersonInfo', {userInfo: this.state.userInfo})
-            Alert.alert("个人信息页");
+            this.turnOnPage('PersonInfo', {userInfo: this.state.userInfo})
           }}>
             <View style={styles.meInfoContainer}>
               <Image style={styles.meInfoAvatar} source={avatar}/>
@@ -162,8 +160,7 @@ export default class MeScreen extends Component {
           <View/>
           <View style={{width: width, height: 20}}/>
           <ListItem icon={require('../../images/ic_settings.png')} text={"设置"} handleClick={() => {
-            // this.turnOnPage('Settings')
-            Alert.alert("设置页");
+            this.turnOnPage('Settings')
           }}/>
           <View style={{width: width, height: 20}}/>
         </ScrollView>

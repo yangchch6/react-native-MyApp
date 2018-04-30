@@ -12,6 +12,7 @@
     "@remobile/react-native-toast": "^1.0.7",
     "react": "16.0.0-alpha.6",
     "react-native": "0.44.2",
+    "react-native-image-crop-picker": "^0.20.1",
     "react-navigation": "^1.5.11"
   },
   "devDependencies": {
